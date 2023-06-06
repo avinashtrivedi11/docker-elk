@@ -6,9 +6,11 @@ name: heartbeat
 
 heartbeat.monitors:
 - type: http
-  schedule: '@every 5s'
+  schedule: '@every 30s'
   urls:
     - http://elasticsearch:9200
+    - http://65.1.88.240/
+    - https://tpulse-msa-qa.detectpl.com
   username: heartbeat_internal
   password: ${HEARTBEAT_INTERNAL_PASSWORD}
 
