@@ -4,14 +4,14 @@ import json
 import os
 import logging
 from logging.handlers import RotatingFileHandler
-from pythonjsonlogger import jsonlogger
+# from pythonjsonlogger import jsonlogger
 import time
 
 # Setup rotating log handler
 logFile = 'logs/jira_reports.log'
-my_handler = RotatingFileHandler(logFile, mode='a', maxBytes=5*1024*1024, backupCount=2, encoding=None, delay=0)
-log_formatter = jsonlogger.JsonFormatter(fmt="%(asctime)s %(levelname)s %(message)s")
-my_handler.setFormatter(log_formatter)
+my_handler = RotatingFileHandler(logFile, mode='a', maxBytes=5*1024*1024, backupCount=0, encoding=None, delay=0)
+# log_formatter = jsonlogger.JsonFormatter(fmt="%(asctime)s %(levelname)s")
+# my_handler.setFormatter(log_formatter)
 my_handler.setLevel(logging.INFO)
 app_log = logging.getLogger('root')
 app_log.setLevel(logging.INFO)
