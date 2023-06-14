@@ -58,7 +58,7 @@ def fetch_service_cost(service_name):
 
     # Make the request
     response = client.get_cost_and_usage(**params)
-
+    print(response)
     # Transform each response and log it separately
     for result in response["ResultsByTime"]:
         transformed_response = transform_log(result, service_name)
@@ -74,7 +74,6 @@ def transform_log(result, service_name):
 
     # Set the transformed log structure
     transformed_data = {
-        "message": f"AWS Cost Explorer Transformed Response for {service_name}",
         "aws_costs_date": result["TimePeriod"]["Start"],
         "aws_cost_service": service_name,
         "aws_cost_amount_unblended": total["UnblendedCost"]["Amount"],
@@ -90,6 +89,6 @@ def transform_log(result, service_name):
 
 while True:
     fetch_service_cost("Amazon Elastic Compute Cloud - Compute")
-    # fetch_service_cost("Amazon Simple Storage Service")
+    fetch_service_cost("Amazon Simple Storage Service")
     # Sleep for 24 hours
     time.sleep(60 * 60 * 24)
