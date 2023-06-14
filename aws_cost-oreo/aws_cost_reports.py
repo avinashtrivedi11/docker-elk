@@ -50,7 +50,7 @@ def fetch_service_cost(service_name):
     params = {
         "TimePeriod": {"Start": start_date, "End": end_date},
         "Granularity": "DAILY",
-        "Metrics": ["UnblendedCost", "UsageQuantity"],
+        "Metrics": ["BlendedCost", "UnblendedCost", "UsageQuantity"],
         "Filter": {
             "Dimensions": {"Key": "SERVICE", "Values": [service_name]},
         },
