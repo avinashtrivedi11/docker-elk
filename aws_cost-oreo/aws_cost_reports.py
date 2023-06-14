@@ -50,7 +50,7 @@ def fetch_service_cost(service_name):
     params = {
         "TimePeriod": {"Start": start_date, "End": end_date},
         "Granularity": "DAILY",
-        "Metrics": ["BlendedCost", "UnblendedCost", "UsageQuantity"],
+        "Metrics": ["UnblendedCost", "UsageQuantity"],
         "Filter": {
             "Dimensions": {"Key": "SERVICE", "Values": [service_name]},
         },
@@ -62,12 +62,12 @@ def fetch_service_cost(service_name):
     # Transform each response and log it separately
     for result in response["ResultsByTime"]:
         transformed_response = transform_log(result, service_name)
-        logger.info(f"AWS Cost Explorer Transformed Response for {service_name}", extra=transformed_response)
+        logger.info(transformed_response)
 
 
 def transform_log(result, service_name):
     """
-    This function transforms a single day's log according to given specifications
+    This function transforms the log response according to elasticsearch needs
     """
     # Get the total cost metrics
     total = result["Total"]
@@ -88,30 +88,8 @@ def transform_log(result, service_name):
     return transformed_data
 
 
-# def transform_results_by_time(results_by_time):
-#     """
-#     This function transforms the ResultsByTime data according to given specifications
-#     """
-#     transformed_results_by_time = []
-
-#     # Iterate over the ResultsByTime data and transform it
-#     for result in results_by_time:
-#         transformed_result = {}
-
-#         for key in result:
-#             if key == "TimePeriod":
-#                 transformed_result["aws_cost_" + key] = result[key]["Start"]
-#             else:
-#                 transformed_result["aws_cost_" + key] = result[key]
-
-#         # Append the transformed result to the list
-#         transformed_results_by_time.append(transformed_result)
-
-#     return transformed_results_by_time
-
-
 while True:
     fetch_service_cost("Amazon Elastic Compute Cloud - Compute")
-    fetch_service_cost("Amazon Simple Storage Service")
+    # fetch_service_cost("Amazon Simple Storage Service")
     # Sleep for 24 hours
     time.sleep(60 * 60 * 24)
