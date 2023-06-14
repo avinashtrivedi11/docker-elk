@@ -71,19 +71,30 @@ def transform_log(result, service_name):
     """
     transformed_data = {}
 
-    # Set the service name
-    transformed_data[f"{service_name}_cost_ServiceName"] = service_name
+    # Set the message
+    transformed_data["message"] = f"AWS Cost Explorer Transformed Response for {service_name}"
 
-    # Set the time period
-    transformed_data[f"{service_name}_cost_TimePeriod"] = result["TimePeriod"]["Start"]
+    # Set the date
+    transformed_data["aws_costs_date"] = result["TimePeriod"]["Start"]
 
-    # Set the metrics
+    # Set the service
+    transformed_data["aws_cost_service"] = service_name
+
+    # Set the costs and units
     for metric_key, metric_value in result["Total"].items():
-        transformed_data[f"{service_name}_cost_{metric_key}_Amount"] = metric_value["Amount"]
-        transformed_data[f"{service_name}_cost_{metric_key}_Unit"] = metric_value["Unit"]
+        if metric_key == "BlendedCost":
+            transformed_data["aws_cost_amount_blended"] = float(metric_value["Amount"])
+        elif metric_key == "UnblendedCost":
+            transformed_data["aws_cost_amount_unblended"] = float(metric_value["Amount"])
+        elif metric_key == "UsageQuantity":
+            transformed_data["aws_cost_usage_quantity"] = float(metric_value["Amount"])
+            transformed_data["aws_cost_usage_unit"] = metric_value["Unit"]
+
+    # Set the cost unit (assuming the cost unit is same for blended and unblended)
+    transformed_data["aws_cost_unit"] = result["Total"]["BlendedCost"]["Unit"]
 
     # Set the estimated value
-    transformed_data[f"{service_name}_cost_Estimated"] = result["Estimated"]
+    transformed_data["aws_cost_estimated"] = result["Estimated"]
 
     return transformed_data
 
