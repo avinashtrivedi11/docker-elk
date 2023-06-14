@@ -59,41 +59,33 @@ def fetch_service_cost(service_name):
     # Make the request
     response = client.get_cost_and_usage(**params)
 
-    # Transform the response
-    transformed_responses = transform_log(response, service_name)
-
-    # Log the transformed response
-    for transformed_response in transformed_responses:
+    # Transform each response and log it separately
+    for result in response["ResultsByTime"]:
+        transformed_response = transform_log(result, service_name)
         logger.info(f"AWS Cost Explorer Transformed Response for {service_name}", extra=transformed_response)
 
 
-def transform_log(data, service_name):
+def transform_log(result, service_name):
     """
-    This function transforms the log according to given specifications
+    This function transforms a single day's log according to given specifications
     """
-    transformed_datas = []
+    transformed_data = {}
 
-    # Iterate over the data and transform it
-    for result in data["ResultsByTime"]:
-        transformed_data = {}
+    # Set the service name
+    transformed_data[f"{service_name}_cost_ServiceName"] = service_name
 
-        # Set the service name
-        transformed_data[f"{service_name}_cost_ServiceName"] = service_name
+    # Set the time period
+    transformed_data[f"{service_name}_cost_TimePeriod"] = result["TimePeriod"]["Start"]
 
-        # Set the time period
-        transformed_data[f"{service_name}_cost_TimePeriod"] = result["TimePeriod"]["Start"]
+    # Set the metrics
+    for metric_key, metric_value in result["Total"].items():
+        transformed_data[f"{service_name}_cost_{metric_key}_Amount"] = metric_value["Amount"]
+        transformed_data[f"{service_name}_cost_{metric_key}_Unit"] = metric_value["Unit"]
 
-        # Set the metrics
-        for metric_key, metric_value in result["Total"].items():
-            transformed_data[f"{service_name}_cost_{metric_key}_Amount"] = metric_value["Amount"]
-            transformed_data[f"{service_name}_cost_{metric_key}_Unit"] = metric_value["Unit"]
+    # Set the estimated value
+    transformed_data[f"{service_name}_cost_Estimated"] = result["Estimated"]
 
-        # Set the estimated value
-        transformed_data[f"{service_name}_cost_Estimated"] = result["Estimated"]
-
-        transformed_datas.append(transformed_data)
-
-    return transformed_datas
+    return transformed_data
 
 
 def transform_results_by_time(results_by_time):
