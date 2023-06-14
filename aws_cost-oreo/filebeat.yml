@@ -1,0 +1,42 @@
+## Filebeat configuration
+## https://github.com/elastic/beats/blob/main/deploy/docker/filebeat.docker.yml
+#
+
+name: filebeat
+logging.level: debug
+filebeat.inputs:
+- type: filestream
+  id: aws_costs-logstream
+  enabled: true
+  paths:
+    - /app/logs/*.log
+
+processors:
+- decode_json_fields:
+    fields: ["message"]
+    target: ""
+    overwrite_keys: true
+
+setup.template.name: "aws_costs"
+setup.template.pattern: "aws_costs-*"
+
+# Commenting out Elasticsearch output
+output.elasticsearch:
+   hosts: ["43.205.192.21:9200"]
+   index: "aws_costs-%{+yyyy.MM.dd}"
+   username: filebeat_internal
+   password: FILEBEAT_PASSWORD
+
+# Adding Logstash output
+#output.logstash:
+#  hosts: ["43.205.192.21:5044"]
+#  username: filebeat_internal
+#  password: FILEBEAT_PASSWORD
+
+## HTTP endpoint for health checking
+## https://www.elastic.co/guide/en/beats/filebeat/current/http-endpoint.html
+#
+
+http:
+  enabled: true
+  host: 0.0.0.0
