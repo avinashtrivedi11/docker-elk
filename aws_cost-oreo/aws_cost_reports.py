@@ -60,26 +60,40 @@ def fetch_service_cost(service_name):
     response = client.get_cost_and_usage(**params)
 
     # Transform the response
-    transformed_response = transform_log(response, service_name)
+    transformed_responses = transform_log(response, service_name)
 
     # Log the transformed response
-    logger.info(f"AWS Cost Explorer Transformed Response for {service_name}", extra=transformed_response)
+    for transformed_response in transformed_responses:
+        logger.info(f"AWS Cost Explorer Transformed Response for {service_name}", extra=transformed_response)
 
 
 def transform_log(data, service_name):
     """
     This function transforms the log according to given specifications
     """
-    transformed_data = {}
+    transformed_datas = []
 
     # Iterate over the data and transform it
-    for key in data:
-        if key == "ResultsByTime":
-            transformed_data[f"{service_name}_cost_" + key] = transform_results_by_time(data[key])
-        else:
-            transformed_data[f"{service_name}_cost_" + key] = data[key]
+    for result in data["ResultsByTime"]:
+        transformed_data = {}
 
-    return transformed_data
+        # Set the service name
+        transformed_data[f"{service_name}_cost_ServiceName"] = service_name
+
+        # Set the time period
+        transformed_data[f"{service_name}_cost_TimePeriod"] = result["TimePeriod"]["Start"]
+
+        # Set the metrics
+        for metric_key, metric_value in result["Total"].items():
+            transformed_data[f"{service_name}_cost_{metric_key}_Amount"] = metric_value["Amount"]
+            transformed_data[f"{service_name}_cost_{metric_key}_Unit"] = metric_value["Unit"]
+
+        # Set the estimated value
+        transformed_data[f"{service_name}_cost_Estimated"] = result["Estimated"]
+
+        transformed_datas.append(transformed_data)
+
+    return transformed_datas
 
 
 def transform_results_by_time(results_by_time):
