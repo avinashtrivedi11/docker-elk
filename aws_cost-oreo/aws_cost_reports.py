@@ -69,56 +69,45 @@ def transform_log(result, service_name):
     """
     This function transforms a single day's log according to given specifications
     """
-    transformed_data = {}
+    # Get the total cost metrics
+    total = result["Total"]
 
-    # Set the message
-    transformed_data["message"] = f"AWS Cost Explorer Transformed Response for {service_name}"
-
-    # Set the date
-    transformed_data["aws_costs_date"] = result["TimePeriod"]["Start"]
-
-    # Set the service
-    transformed_data["aws_cost_service"] = service_name
-
-    # Set the costs and units
-    for metric_key, metric_value in result["Total"].items():
-        if metric_key == "BlendedCost":
-            transformed_data["aws_cost_amount_blended"] = float(metric_value["Amount"])
-        elif metric_key == "UnblendedCost":
-            transformed_data["aws_cost_amount_unblended"] = float(metric_value["Amount"])
-        elif metric_key == "UsageQuantity":
-            transformed_data["aws_cost_usage_quantity"] = float(metric_value["Amount"])
-            transformed_data["aws_cost_usage_unit"] = metric_value["Unit"]
-
-    # Set the cost unit (assuming the cost unit is same for blended and unblended)
-    transformed_data["aws_cost_unit"] = result["Total"]["BlendedCost"]["Unit"]
-
-    # Set the estimated value
-    transformed_data["aws_cost_estimated"] = result["Estimated"]
+    # Set the transformed log structure
+    transformed_data = {
+        "message": f"AWS Cost Explorer Transformed Response for {service_name}",
+        "aws_costs_date": result["TimePeriod"]["Start"],
+        "aws_cost_service": service_name,
+        "aws_cost_amount_unblended": total["UnblendedCost"]["Amount"],
+        "aws_cost_amount_blended": total["BlendedCost"]["Amount"],
+        "aws_cost_unit": total["BlendedCost"]["Unit"],
+        "aws_cost_usage_quantity": total["UsageQuantity"]["Amount"],
+        "aws_cost_usage_unit": total["UsageQuantity"]["Unit"],
+        "aws_cost_estimated": result["Estimated"],
+    }
 
     return transformed_data
 
 
-def transform_results_by_time(results_by_time):
-    """
-    This function transforms the ResultsByTime data according to given specifications
-    """
-    transformed_results_by_time = []
+# def transform_results_by_time(results_by_time):
+#     """
+#     This function transforms the ResultsByTime data according to given specifications
+#     """
+#     transformed_results_by_time = []
 
-    # Iterate over the ResultsByTime data and transform it
-    for result in results_by_time:
-        transformed_result = {}
+#     # Iterate over the ResultsByTime data and transform it
+#     for result in results_by_time:
+#         transformed_result = {}
 
-        for key in result:
-            if key == "TimePeriod":
-                transformed_result["aws_cost_" + key] = result[key]["Start"]
-            else:
-                transformed_result["aws_cost_" + key] = result[key]
+#         for key in result:
+#             if key == "TimePeriod":
+#                 transformed_result["aws_cost_" + key] = result[key]["Start"]
+#             else:
+#                 transformed_result["aws_cost_" + key] = result[key]
 
-        # Append the transformed result to the list
-        transformed_results_by_time.append(transformed_result)
+#         # Append the transformed result to the list
+#         transformed_results_by_time.append(transformed_result)
 
-    return transformed_results_by_time
+#     return transformed_results_by_time
 
 
 while True:
